@@ -11,6 +11,13 @@ export const metadata: Metadata = {
   title: 'PC Builder - Build Your Dream PC',
   description:
     'Build your perfect PC with real-time compatibility checking. Select components, check compatibility, and share your build.',
+  openGraph: {
+    title: 'BuildStack PC Builder | Create Your Dream PC',
+    description:
+      'Build your perfect PC with real-time compatibility checking. Select components, check compatibility, and share your custom build with BuildStack.',
+    type: 'website',
+    siteName: 'BuildStack',
+  },
 };
 
 export default function RootLayout({
