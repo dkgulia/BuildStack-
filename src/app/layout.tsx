@@ -15,6 +15,7 @@ export const metadata: Metadata = {
     title: 'BuildStack PC Builder | Create Your Dream PC',
     description:
       'Build your perfect PC with real-time compatibility checking. Select components, check compatibility, and share your custom build with BuildStack.',
+    url: 'https://build-stack-lilac.vercel.app/',
     type: 'website',
     siteName: 'BuildStack',
   },
