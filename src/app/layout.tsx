@@ -12,9 +12,9 @@ export const metadata: Metadata = {
   description:
     'Build your perfect PC with real-time compatibility checking. Select components, check compatibility, and share your build.',
   openGraph: {
-    title: 'BuildStack PC Builder | Create Your Dream PC',
+    title: 'Build Stack - Modern Web Development Platform',
     description:
-      'Build your perfect PC with real-time compatibility checking. Select components, check compatibility, and share your custom build with BuildStack.',
+      'Build Stack offers a streamlined platform for modern web development and deployment. Create, collaborate, and deploy your projects efficiently with our tools.',
     url: 'https://build-stack-lilac.vercel.app/',
     type: 'website',
     siteName: 'BuildStack',
