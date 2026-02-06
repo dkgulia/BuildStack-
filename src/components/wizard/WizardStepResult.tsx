@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
-  Cpu, Monitor, CircuitBoard, MemoryStick, HardDrive, Zap, Box, Fan,
+  Cpu, Monitor, CircuitBoard, MemoryStick, HardDrive, Zap, Box, Fan, Tv,
   Loader2, CheckCircle2, AlertTriangle, RotateCcw, ArrowRight,
 } from 'lucide-react';
 
@@ -14,6 +15,7 @@ interface WizardBuildPart {
     type: string;
     brand: string;
     name: string;
+    image_url?: string | null;
     specs: Record<string, unknown>;
   };
   reason: string;
@@ -34,6 +36,7 @@ const CATEGORY_CONFIG: Record<string, { label: string; icon: React.ElementType }
   psu: { label: 'PSU', icon: Zap },
   case: { label: 'Case', icon: Box },
   cooling: { label: 'Cooling', icon: Fan },
+  monitor: { label: 'Monitor', icon: Tv },
 };
 
 const LOADING_MESSAGES = [
@@ -45,6 +48,7 @@ const LOADING_MESSAGES = [
   'Sizing the power supply...',
   'Finding a great case...',
   'Adding cooling...',
+  'Picking a monitor...',
 ];
 
 interface WizardStepResultProps {
@@ -105,7 +109,6 @@ export function WizardStepResult({ useCase, platform, budget, onStartOver }: Wiz
   const handleCustomize = () => {
     if (!result?.build) return;
 
-    // Convert wizard build to the format builder expects
     const buildParts: Record<string, unknown> = {};
     for (const [category, item] of Object.entries(result.build)) {
       if (item?.part) {
@@ -175,6 +178,7 @@ export function WizardStepResult({ useCase, platform, budget, onStartOver }: Wiz
           const config = CATEGORY_CONFIG[category];
           if (!config || !item?.part) return null;
           const Icon = config.icon;
+          const hasImage = !!item.part.image_url;
 
           return (
             <motion.div
@@ -185,16 +189,29 @@ export function WizardStepResult({ useCase, platform, budget, onStartOver }: Wiz
               className="p-4 rounded-xl border border-white/10 bg-white/[0.02]"
             >
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
-                  <Icon className="w-4 h-4 text-white/40" />
+                {/* Product image or fallback icon */}
+                <div className="w-14 h-14 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  {hasImage ? (
+                    <Image
+                      src={item.part.image_url!}
+                      alt={item.part.name}
+                      width={56}
+                      height={56}
+                      className="w-full h-full object-contain"
+                      unoptimized
+                    />
+                  ) : (
+                    <Icon className="w-6 h-6 text-white/30" />
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-[10px] text-white/40 uppercase tracking-wide">{config.label}</div>
-                  <div className="text-sm font-medium text-white truncate mt-0.5">
-                    {item.part.brand} {item.part.name}
+                  <div className="text-xs text-white/50 mt-0.5">{item.part.brand}</div>
+                  <div className="text-sm font-medium text-white mt-0.5 break-words leading-snug">
+                    {item.part.name}
                   </div>
                   {item.reason && (
-                    <p className="text-[11px] text-white/30 mt-1 line-clamp-2">{item.reason}</p>
+                    <p className="text-[11px] text-white/30 mt-1.5 line-clamp-2">{item.reason}</p>
                   )}
                 </div>
               </div>

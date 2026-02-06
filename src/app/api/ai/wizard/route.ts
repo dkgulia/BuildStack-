@@ -8,14 +8,14 @@ interface WizardRequest {
   budget?: number | null;
 }
 
-const CATEGORIES = ['cpu', 'gpu', 'motherboard', 'ram', 'storage', 'psu', 'case', 'cooling'] as const;
+const CATEGORIES = ['cpu', 'gpu', 'motherboard', 'ram', 'storage', 'psu', 'case', 'cooling', 'monitor'] as const;
 
 // Budget allocation percentages per use case
 const BUDGET_ALLOCATION: Record<string, Record<string, number>> = {
-  gaming: { cpu: 0.18, gpu: 0.35, motherboard: 0.12, ram: 0.08, storage: 0.10, psu: 0.07, case: 0.06, cooling: 0.04 },
-  editing: { cpu: 0.25, gpu: 0.25, motherboard: 0.12, ram: 0.12, storage: 0.10, psu: 0.07, case: 0.05, cooling: 0.04 },
-  coding: { cpu: 0.25, gpu: 0.15, motherboard: 0.12, ram: 0.15, storage: 0.12, psu: 0.07, case: 0.08, cooling: 0.06 },
-  office: { cpu: 0.22, gpu: 0.15, motherboard: 0.15, ram: 0.12, storage: 0.12, psu: 0.08, case: 0.10, cooling: 0.06 },
+  gaming: { cpu: 0.16, gpu: 0.30, motherboard: 0.10, ram: 0.07, storage: 0.09, psu: 0.06, case: 0.05, cooling: 0.04, monitor: 0.13 },
+  editing: { cpu: 0.22, gpu: 0.22, motherboard: 0.10, ram: 0.10, storage: 0.09, psu: 0.06, case: 0.04, cooling: 0.04, monitor: 0.13 },
+  coding: { cpu: 0.22, gpu: 0.13, motherboard: 0.10, ram: 0.13, storage: 0.10, psu: 0.06, case: 0.06, cooling: 0.05, monitor: 0.15 },
+  office: { cpu: 0.19, gpu: 0.12, motherboard: 0.12, ram: 0.10, storage: 0.10, psu: 0.07, case: 0.08, cooling: 0.05, monitor: 0.17 },
 };
 
 // AMD and Intel socket patterns
@@ -111,6 +111,12 @@ function heuristicScore(
       break;
     case 'cooling':
       score += ((specs.tdp_rating as number) || 0) / 5;
+      break;
+    case 'monitor':
+      score += ((specs.refresh_rate as number) || 0) * 2;
+      score += ((specs.screen_size as number) || 0) * 3;
+      if (useCase === 'gaming') score += ((specs.refresh_rate as number) || 0) * 5;
+      if (useCase === 'editing') score += ((specs.screen_size as number) || 0) * 5;
       break;
   }
 
