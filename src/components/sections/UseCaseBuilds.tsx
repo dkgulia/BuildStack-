@@ -8,26 +8,26 @@ import { ArrowRight } from 'lucide-react';
 const USE_CASES = [
   {
     title: 'Gaming PC',
-    budget: '₹80,000 – ₹2,50,000',
     focus: 'High FPS, ray tracing, smooth gameplay',
+    highlight: 'RTX-ready builds',
     query: 'gaming',
   },
   {
     title: 'Video Editing',
-    budget: '₹1,00,000 – ₹3,00,000',
     focus: '4K/8K timeline, fast renders, color accuracy',
+    highlight: 'Multi-core optimized',
     query: 'editing',
   },
   {
     title: 'Coding / Dev',
-    budget: '₹60,000 – ₹1,50,000',
     focus: 'Multi-tasking, fast builds, Docker-ready',
+    highlight: 'RAM & CPU focused',
     query: 'coding',
   },
   {
     title: 'Office Workstation',
-    budget: '₹40,000 – ₹80,000',
     focus: 'Reliability, quiet operation, efficiency',
+    highlight: 'Low power, silent',
     query: 'office',
   },
 ];
@@ -104,15 +104,14 @@ export function UseCaseBuilds() {
               <div className="mt-4 space-y-2">
                 <div>
                   <span className="text-xs text-muted-foreground uppercase tracking-wide">
-                    Budget
-                  </span>
-                  <p className="text-sm font-medium">{useCase.budget}</p>
-                </div>
-                <div>
-                  <span className="text-xs text-muted-foreground uppercase tracking-wide">
                     Focus
                   </span>
                   <p className="text-sm text-muted-foreground">{useCase.focus}</p>
+                </div>
+                <div>
+                  <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium rounded-full bg-primary/10 text-primary">
+                    {useCase.highlight}
+                  </span>
                 </div>
               </div>
               <Link
@@ -124,6 +123,22 @@ export function UseCaseBuilds() {
               </Link>
             </motion.div>
           ))}
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: prefersReducedMotion ? 0 : 0.5, delay: 0.3 }}
+          className="text-center mt-8"
+        >
+          <Link
+            href="/presets"
+            className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Browse all 120+ templates
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </motion.div>
       </div>
     </section>

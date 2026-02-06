@@ -1,25 +1,20 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { Part, getSpecsDisplay } from './types';
+import { GitCompareArrows } from 'lucide-react';
+import { Part, getSpecsDisplay, Category } from './types';
 
 interface CompareDrawerProps {
   parts: Part[];
+  activeCategory?: Category;
   onRemove: (partId: string) => void;
   onClear: () => void;
   onSelect: (part: Part) => void;
 }
 
-function formatINR(price: number): string {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
-}
-
-export function CompareDrawer({ parts, onRemove, onClear, onSelect }: CompareDrawerProps) {
+export function CompareDrawer({ parts, activeCategory, onRemove, onClear, onSelect }: CompareDrawerProps) {
+  const router = useRouter();
   const prefersReducedMotion = useReducedMotion();
 
   if (parts.length === 0) return null;
@@ -40,12 +35,27 @@ export function CompareDrawer({ parts, onRemove, onClear, onSelect }: CompareDra
             </span>
             <span className="text-xs text-white/50">(max 3)</span>
           </div>
-          <button
-            onClick={onClear}
-            className="text-xs text-white/50 hover:text-white transition-colors"
-          >
-            Clear all
-          </button>
+          <div className="flex items-center gap-3">
+            {parts.length >= 2 && (
+              <button
+                onClick={() => {
+                  const ids = parts.map((p) => p.id).join(',');
+                  const type = activeCategory || parts[0]?.type || 'cpu';
+                  router.push(`/compare?ids=${ids}&type=${type}`);
+                }}
+                className="flex items-center gap-1 text-xs font-medium text-white/70 hover:text-white transition-colors"
+              >
+                <GitCompareArrows className="w-3.5 h-3.5" />
+                Compare Details
+              </button>
+            )}
+            <button
+              onClick={onClear}
+              className="text-xs text-white/50 hover:text-white transition-colors"
+            >
+              Clear all
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -97,10 +107,7 @@ export function CompareDrawer({ parts, onRemove, onClear, onSelect }: CompareDra
                       </span>
                     ))}
                   </div>
-                  <div className="flex items-center justify-between mt-3">
-                    <span className="text-sm font-semibold text-white">
-                      {formatINR(part.price)}
-                    </span>
+                  <div className="flex items-center justify-end mt-3">
                     <button
                       onClick={() => onSelect(part)}
                       className="px-3 py-1 text-xs font-medium rounded-lg bg-white text-black hover:bg-white/90 transition-colors"

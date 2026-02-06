@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getBuild } from '@/lib/store';
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -15,7 +15,7 @@ export async function GET(
       );
     }
 
-    const build = getBuild(id);
+    const build = await getBuild(id);
 
     if (!build) {
       return NextResponse.json(

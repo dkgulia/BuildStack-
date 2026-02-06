@@ -4,19 +4,10 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { ArrowLeft, Zap, DollarSign, Shield, Cpu, AlertTriangle, CheckCircle, XCircle, Loader2, Sparkles, Share2, ArrowRight } from 'lucide-react';
+import { ArrowLeft, Zap, Shield, Cpu, AlertTriangle, CheckCircle, XCircle, Loader2, Sparkles, Share2, ArrowRight } from 'lucide-react';
 import { Build, evaluateCompatibility, CompatibilityReport, Issue } from '@/lib/compatibility';
 import { Badge } from '@/components/shared/Badge';
 import { CompatiblePartsSheet } from '@/components/builder/CompatiblePartsSheet';
-
-function formatINR(price: number): string {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
-}
 
 interface CompatiblePart {
   id: string;
@@ -382,18 +373,8 @@ export default function ReviewPage() {
 
           <motion.div
             variants={itemVariants}
-            className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
+            className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"
           >
-            <div className="p-4 rounded-2xl border border-white/10 bg-white/5">
-              <div className="flex items-center gap-2 text-white/50 mb-2">
-                <DollarSign className="w-4 h-4" />
-                <span className="text-xs uppercase tracking-wide">Total Price</span>
-              </div>
-              <div className="text-xl sm:text-2xl font-bold text-white">
-                {formatINR(report.totalPrice)}
-              </div>
-            </div>
-
             <div className="p-4 rounded-2xl border border-white/10 bg-white/5">
               <div className="flex items-center gap-2 text-white/50 mb-2">
                 <Zap className="w-4 h-4" />

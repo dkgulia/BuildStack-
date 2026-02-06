@@ -36,6 +36,7 @@ const initialBuild: Build = {
   psu: null,
   case: null,
   cooling: null,
+  monitor: null,
 };
 
 export const useBuilder = create<BuilderState>()(

@@ -22,8 +22,14 @@ export default function Home() {
             <Link href="#features" className="hover:text-foreground transition-colors">
               Features
             </Link>
-            <Link href="#templates" className="hover:text-foreground transition-colors">
+            <Link href="/presets" className="hover:text-foreground transition-colors">
               Templates
+            </Link>
+            <Link href="/monitors" className="hover:text-foreground transition-colors">
+              Monitors
+            </Link>
+            <Link href="/laptops" className="hover:text-foreground transition-colors">
+              Laptops
             </Link>
           </nav>
           <Link
@@ -72,11 +78,14 @@ export default function Home() {
             <Link href="/builder" className="hover:text-foreground transition-colors">
               Builder
             </Link>
-            <Link href="#features" className="hover:text-foreground transition-colors">
-              Features
-            </Link>
-            <Link href="#templates" className="hover:text-foreground transition-colors">
+            <Link href="/presets" className="hover:text-foreground transition-colors">
               Templates
+            </Link>
+            <Link href="/monitors" className="hover:text-foreground transition-colors">
+              Monitors
+            </Link>
+            <Link href="/laptops" className="hover:text-foreground transition-colors">
+              Laptops
             </Link>
           </div>
         </div>

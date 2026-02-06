@@ -1,4 +1,4 @@
-export type Category = 'cpu' | 'gpu' | 'motherboard' | 'ram' | 'storage' | 'psu' | 'case' | 'cooling';
+export type Category = 'cpu' | 'gpu' | 'motherboard' | 'ram' | 'storage' | 'psu' | 'case' | 'cooling' | 'monitor';
 
 export interface Part {
   id: string;
@@ -21,6 +21,7 @@ export interface Build {
   psu: Part | null;
   case: Part | null;
   cooling: Part | null;
+  monitor: Part | null;
 }
 
 export interface CompatibilityIssue {
@@ -38,6 +39,7 @@ export const CATEGORIES: { id: Category; label: string }[] = [
   { id: 'psu', label: 'PSU' },
   { id: 'case', label: 'Case' },
   { id: 'cooling', label: 'Cooling' },
+  { id: 'monitor', label: 'Monitor (Optional)' },
 ];
 
 // Helper to extract specs for display
@@ -91,6 +93,13 @@ export function getSpecsDisplay(part: Part): string[] {
       return [
         specs.type as string || '',
         specs.tdp_rating ? `${specs.tdp_rating}W` : '',
+      ].filter(Boolean);
+    case 'monitor':
+      return [
+        specs.screen_size ? `${specs.screen_size}"` : '',
+        specs.resolution as string || '',
+        specs.refresh_rate ? `${specs.refresh_rate}Hz` : '',
+        specs.panel_type as string || '',
       ].filter(Boolean);
     default:
       return [];

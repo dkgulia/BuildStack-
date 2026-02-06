@@ -12,15 +12,6 @@ interface ComponentCardProps {
   onSelect: () => void;
 }
 
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
-}
-
 function getSpecsDisplay(component: PCComponent): string[] {
   const specs = component.specs as Record<string, unknown>;
   const type = component.type as ComponentType;
@@ -129,9 +120,8 @@ export function ComponentCard({
         </div>
       </div>
 
-      {/* Price & Select */}
+      {/* Select */}
       <div className="flex flex-col items-end gap-1 flex-shrink-0">
-        <span className="font-semibold">{formatPrice(component.price)}</span>
         <button
           className={cn(
             'flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors',

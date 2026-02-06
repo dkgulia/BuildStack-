@@ -24,11 +24,12 @@ export async function POST(request: NextRequest) {
         psu: body.parts.psu || null,
         case: body.parts.case || null,
         cooling: body.parts.cooling || null,
+        monitor: body.parts.monitor || null,
       },
       currency: 'INR',
     };
 
-    const savedBuild = createBuild(build);
+    const savedBuild = await createBuild(build);
 
     return NextResponse.json({
       success: true,

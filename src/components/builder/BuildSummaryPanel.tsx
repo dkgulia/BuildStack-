@@ -5,7 +5,7 @@ import { Build, Category, CompatibilityIssue, CATEGORIES, getPsuWattage } from '
 
 interface BuildSummaryPanelProps {
   build: Build;
-  totalPrice: number;
+  totalPrice?: number;
   estimatedWattage: number;
   issues: CompatibilityIssue[];
   onCategoryClick: (category: Category) => void;
@@ -14,18 +14,8 @@ interface BuildSummaryPanelProps {
   onShare?: () => void;
 }
 
-function formatINR(price: number): string {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
-}
-
 export function BuildSummaryPanel({
   build,
-  totalPrice,
   estimatedWattage,
   issues,
   onCategoryClick,
@@ -172,9 +162,6 @@ export function BuildSummaryPanel({
               </div>
               {part && (
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className="text-sm text-white/70">
-                    {formatINR(part.price)}
-                  </span>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -203,25 +190,8 @@ export function BuildSummaryPanel({
         })}
       </div>
 
-      {/* Total price */}
-      <motion.div
-        variants={itemVariants}
-        className="flex items-center justify-between py-3 border-t border-white/10"
-      >
-        <span className="text-white/70">Total</span>
-        <AnimatePresence mode="wait">
-          <motion.span
-            key={totalPrice}
-            initial={prefersReducedMotion ? {} : { opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={prefersReducedMotion ? {} : { opacity: 0, scale: 1.1 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="text-2xl font-bold text-white"
-          >
-            {formatINR(totalPrice)}
-          </motion.span>
-        </AnimatePresence>
-      </motion.div>
+      {/* Divider */}
+      <div className="border-t border-white/10" />
 
       {/* Issues list */}
       {issues.length > 0 && (

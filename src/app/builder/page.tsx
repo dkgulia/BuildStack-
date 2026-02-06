@@ -1,16 +1,20 @@
 'use client';
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { Suspense, useState, useCallback, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { ArrowLeft, Search, X } from 'lucide-react';
+import { ArrowLeft, Search, X, Sparkles, Wand2 } from 'lucide-react';
 import { Part, Build, Category, CompatibilityIssue, CATEGORIES, getSocket, getRamType, getTdp, getPsuWattage } from '@/components/builder/types';
 import { PartsTabs } from '@/components/builder/PartsTabs';
 import { PartsList } from '@/components/builder/PartsList';
 import { BuildSummaryPanel } from '@/components/builder/BuildSummaryPanel';
 import { MobileBuildSheet } from '@/components/builder/MobileBuildSheet';
 import { CompareDrawer } from '@/components/builder/CompareDrawer';
+import { SpecFilters, ActiveFilters } from '@/components/builder/SpecFilters';
+import { SortDropdown, SortOption } from '@/components/builder/SortDropdown';
+import { PresetSheet } from '@/components/builder/PresetSheet';
+import { AISuggestButton } from '@/components/builder/AISuggestButton';
 
 const initialBuild: Build = {
   cpu: null,
@@ -21,19 +25,20 @@ const initialBuild: Build = {
   psu: null,
   case: null,
   cooling: null,
+  monitor: null,
 };
 
-function formatINR(price: number): string {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
-}
+// Map use-case query param to preset category
+const USECASE_TO_CATEGORY: Record<string, string> = {
+  gaming: 'gaming',
+  editing: 'editing',
+  coding: 'coding',
+  office: 'office',
+};
 
-export default function BuilderPage() {
+function BuilderContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const prefersReducedMotion = useReducedMotion();
   const [build, setBuild] = useState<Build>(initialBuild);
   const [activeTab, setActiveTab] = useState<Category>('cpu');
@@ -41,6 +46,63 @@ export default function BuilderPage() {
   const [compareList, setCompareList] = useState<string[]>([]);
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [specFilters, setSpecFilters] = useState<ActiveFilters>({});
+  const [sortBy, setSortBy] = useState<SortOption>('default');
+  const [presetSheetOpen, setPresetSheetOpen] = useState(false);
+  const [presetFilterCategory, setPresetFilterCategory] = useState<string | undefined>(undefined);
+
+  // Handle usecase/preset/wizard query params on mount
+  useEffect(() => {
+    const usecase = searchParams.get('usecase');
+    const presetSlug = searchParams.get('preset');
+    const fromWizard = searchParams.get('fromWizard');
+
+    if (fromWizard === 'true') {
+      try {
+        const stored = localStorage.getItem('wizard_build');
+        if (stored) {
+          const wizardBuild = JSON.parse(stored) as Partial<Build>;
+          setBuild((prev) => ({ ...prev, ...wizardBuild }));
+          localStorage.removeItem('wizard_build');
+        }
+      } catch {}
+      return;
+    }
+
+    if (presetSlug) {
+      // Load a specific preset by slug
+      fetch(`/api/presets/${presetSlug}`)
+        .then((res) => res.json())
+        .then((result) => {
+          if (result.success && result.data?.resolved_components) {
+            const resolved = result.data.resolved_components;
+            const newBuild: Partial<Build> = {};
+            const componentTypes: Category[] = ['cpu', 'gpu', 'motherboard', 'ram', 'storage', 'psu', 'case', 'cooling'];
+            for (const type of componentTypes) {
+              const comp = resolved[type];
+              if (comp && 'id' in comp) {
+                newBuild[type] = comp as Part;
+              }
+            }
+            setBuild((prev) => ({ ...prev, ...newBuild }));
+          }
+        })
+        .catch(() => {});
+    } else if (usecase) {
+      // Open preset sheet filtered to this use case
+      const category = USECASE_TO_CATEGORY[usecase];
+      if (category) {
+        setPresetFilterCategory(category);
+        setPresetSheetOpen(true);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Apply preset to build
+  const handleApplyPreset = useCallback((presetBuild: Partial<Build>) => {
+    setBuild((prev) => ({ ...prev, ...presetBuild }));
+  }, []);
 
   // Data fetching state
   const [partsCache, setPartsCache] = useState<Record<Category, Part[]>>({
@@ -52,24 +114,38 @@ export default function BuilderPage() {
     psu: [],
     case: [],
     cooling: [],
+    monitor: [],
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch parts for current category
+  // Build a cache key from filters + sort so we refetch when they change
+  const filterKey = JSON.stringify({ ...specFilters, sort_by: sortBy });
+
+  // Reset filters when category changes
+  useEffect(() => {
+    setSpecFilters({});
+    setSortBy('default');
+  }, [activeTab]);
+
+  // Fetch parts for current category with filters
   useEffect(() => {
     const fetchParts = async () => {
-      // Check if we already have data for this category
-      if (partsCache[activeTab].length > 0) {
-        setIsLoading(false);
-        return;
-      }
-
       setIsLoading(true);
       setError(null);
 
       try {
-        const response = await fetch(`/api/components/${activeTab}`);
+        const params = new URLSearchParams();
+        // Add spec filters
+        for (const [key, value] of Object.entries(specFilters)) {
+          if (value) params.set(key, value);
+        }
+        // Add sort
+        if (sortBy !== 'default') params.set('sort_by', sortBy);
+
+        const qs = params.toString();
+        const url = `/api/components/${activeTab}${qs ? `?${qs}` : ''}`;
+        const response = await fetch(url);
         const result = await response.json();
 
         if (!response.ok) {
@@ -88,15 +164,11 @@ export default function BuilderPage() {
     };
 
     fetchParts();
-  }, [activeTab, partsCache]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, filterKey]);
 
   // Get parts for current category
   const categoryParts = partsCache[activeTab];
-
-  // Calculate total price
-  const totalPrice = useMemo(() => {
-    return Object.values(build).reduce((sum, part) => sum + (part?.price || 0), 0);
-  }, [build]);
 
   // Calculate estimated wattage
   const estimatedWattage = useMemo(() => {
@@ -263,10 +335,24 @@ export default function BuilderPage() {
             </Link>
           </div>
 
-          {/* Desktop total price */}
-          <div className="hidden lg:flex items-center gap-4">
-            <span className="text-sm text-white/50">Total</span>
-            <span className="text-lg font-semibold text-white">{formatINR(totalPrice)}</span>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/builder/wizard"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/10 text-white/70 hover:bg-white/15 transition-colors"
+            >
+              <Wand2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Guided Setup</span>
+            </Link>
+            <button
+              onClick={() => {
+                setPresetFilterCategory(undefined);
+                setPresetSheetOpen(true);
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/10 text-white/70 hover:bg-white/15 transition-colors"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              Templates
+            </button>
           </div>
         </div>
       </header>
@@ -307,14 +393,31 @@ export default function BuilderPage() {
               </div>
             </div>
 
-            {/* Category Title */}
+            {/* Spec Filters */}
+            <div className="mb-4">
+              <SpecFilters
+                category={activeTab}
+                filters={specFilters}
+                onFiltersChange={setSpecFilters}
+              />
+            </div>
+
+            {/* Category Title + Sort */}
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-medium text-white">
                 {CATEGORIES.find((c) => c.id === activeTab)?.label}
               </h2>
-              <span className="text-sm text-white/50">
-                {isLoading ? 'Loading...' : `${categoryParts.length} options`}
-              </span>
+              <div className="flex items-center gap-3">
+                <AISuggestButton
+                  build={build}
+                  targetCategory={activeTab}
+                  onSelect={handleSelectPart}
+                />
+                <SortDropdown value={sortBy} onChange={setSortBy} />
+                <span className="text-sm text-white/50">
+                  {isLoading ? 'Loading...' : `${categoryParts.length} options`}
+                </span>
+              </div>
             </div>
 
             {/* Error State */}
@@ -352,7 +455,6 @@ export default function BuilderPage() {
           <div className="hidden lg:block lg:w-[38%] px-6 py-6">
             <BuildSummaryPanel
               build={build}
-              totalPrice={totalPrice}
               estimatedWattage={estimatedWattage}
               issues={compatibilityIssues}
               onCategoryClick={setActiveTab}
@@ -369,7 +471,6 @@ export default function BuilderPage() {
         <div className="flex items-center justify-between">
           <div>
             <div className="text-xs text-white/50">{selectedCount}/8 parts selected</div>
-            <div className="text-lg font-semibold text-white">{formatINR(totalPrice)}</div>
           </div>
           <button
             onClick={() => setMobileSheetOpen(true)}
@@ -385,7 +486,6 @@ export default function BuilderPage() {
         isOpen={mobileSheetOpen}
         onClose={() => setMobileSheetOpen(false)}
         build={build}
-        totalPrice={totalPrice}
         estimatedWattage={estimatedWattage}
         issues={compatibilityIssues}
         onCategoryClick={setActiveTab}
@@ -399,6 +499,7 @@ export default function BuilderPage() {
         {compareParts.length > 0 && (
           <CompareDrawer
             parts={compareParts}
+            activeCategory={activeTab}
             onRemove={(partId) => handleCompareToggle(partId)}
             onClear={handleCompareClear}
             onSelect={handleCompareSelect}
@@ -406,8 +507,28 @@ export default function BuilderPage() {
         )}
       </AnimatePresence>
 
+      {/* Preset Sheet */}
+      <PresetSheet
+        isOpen={presetSheetOpen}
+        onClose={() => setPresetSheetOpen(false)}
+        filterCategory={presetFilterCategory}
+        onApply={handleApplyPreset}
+      />
+
       {/* Bottom padding for mobile to account for fixed bar */}
       <div className="lg:hidden h-20" />
     </div>
+  );
+}
+
+export default function BuilderPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
+        <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+      </div>
+    }>
+      <BuilderContent />
+    </Suspense>
   );
 }

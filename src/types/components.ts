@@ -7,7 +7,8 @@ export type ComponentType =
   | 'storage'
   | 'psu'
   | 'case'
-  | 'cooling';
+  | 'cooling'
+  | 'monitor';
 
 export interface ComponentCategory {
   id: string;
@@ -110,6 +111,7 @@ export interface Build {
   psu: PCComponent | null;
   case: PCComponent | null;
   cooling: PCComponent | null;
+  monitor: PCComponent | null;
 }
 
 export interface SavedBuild {

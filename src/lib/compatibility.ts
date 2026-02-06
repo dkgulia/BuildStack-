@@ -1,4 +1,4 @@
-export type PartCategory = 'cpu' | 'gpu' | 'motherboard' | 'ram' | 'storage' | 'psu' | 'case' | 'cooling';
+export type PartCategory = 'cpu' | 'gpu' | 'motherboard' | 'ram' | 'storage' | 'psu' | 'case' | 'cooling' | 'monitor';
 
 export interface Part {
   id: string;
@@ -21,6 +21,7 @@ export interface Build {
     psu?: Part | null;
     case?: Part | null;
     cooling?: Part | null;
+    monitor?: Part | null;
   };
   currency: 'INR';
   createdAt?: string;

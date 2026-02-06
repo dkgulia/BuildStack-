@@ -65,6 +65,10 @@ async function fetchGPUs() {
       g.tdp_watts, g.recommended_psu_watts, g.power_connectors
     FROM pc_gpu g
     WHERE g.price IS NOT NULL AND g.price > 0
+      AND g.name NOT ILIKE '%laptop%'
+      AND g.name NOT ILIKE '%mobile%'
+      AND g.name NOT ILIKE '%max-q%'
+      AND g.name NOT ILIKE '%notebook%'
     ORDER BY g.price
   `;
   const result = await ignipcPool.query(query);
@@ -119,6 +123,9 @@ async function fetchRAM() {
     FROM pc_ram r
     LEFT JOIN pc_ram_type t ON r.ram_type_id = t.ram_type_id
     WHERE r.price IS NOT NULL AND r.price > 0
+      AND r.name NOT ILIKE '%sodimm%'
+      AND r.name NOT ILIKE '%notebook%'
+      AND r.name NOT ILIKE '%laptop%'
     ORDER BY r.price
   `;
   const result = await ignipcPool.query(query);

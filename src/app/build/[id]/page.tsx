@@ -9,15 +9,6 @@ import { Build, evaluateCompatibility, CompatibilityReport } from '@/lib/compati
 import { Badge } from '@/components/shared/Badge';
 import { CopyLinkButton } from '@/components/shared/CopyLinkButton';
 
-function formatINR(price: number): string {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
-}
-
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('en-IN', {
     year: 'numeric',
@@ -195,11 +186,7 @@ export default function BuildPage() {
             </div>
           </motion.div>
 
-          <motion.div variants={itemVariants} className="grid sm:grid-cols-3 gap-4">
-            <div className="p-4 rounded-2xl border border-white/10 bg-white/5">
-              <p className="text-xs text-white/50 uppercase tracking-wide mb-1">Total Price</p>
-              <p className="text-2xl font-bold text-white">{formatINR(report?.totalPrice || 0)}</p>
-            </div>
+          <motion.div variants={itemVariants} className="grid sm:grid-cols-2 gap-4">
             <div className="p-4 rounded-2xl border border-white/10 bg-white/5">
               <p className="text-xs text-white/50 uppercase tracking-wide mb-1">Est. Wattage</p>
               <p className="text-2xl font-bold text-white">{report?.estimatedWattage || 0}W</p>
@@ -241,11 +228,6 @@ export default function BuildPage() {
                           <p className="text-white/30 mt-0.5">Not selected</p>
                         )}
                       </div>
-                      {part && (
-                        <p className="text-white font-semibold ml-4 flex-shrink-0">
-                          {formatINR(part.price)}
-                        </p>
-                      )}
                     </div>
                   </motion.div>
                 );

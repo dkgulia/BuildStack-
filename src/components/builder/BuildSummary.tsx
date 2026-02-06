@@ -35,21 +35,12 @@ const COMPONENT_CONFIG: Record<
   psu: { label: 'PSU', icon: Zap },
   case: { label: 'Case', icon: Box },
   cooling: { label: 'Cooling', icon: Fan },
+  monitor: { label: 'Monitor', icon: Monitor },
 };
-
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
-}
 
 export function BuildSummary() {
   const {
     build,
-    getTotalPrice,
     getSelectedCount,
     checkCompatibility,
     removeComponent,
@@ -59,7 +50,6 @@ export function BuildSummary() {
 
   const [copied, setCopied] = useState(false);
 
-  const totalPrice = getTotalPrice();
   const selectedCount = getSelectedCount();
   const compatibility = checkCompatibility();
 
@@ -141,9 +131,6 @@ export function BuildSummary() {
                 )}
                 {component && (
                   <>
-                    <span className="text-sm font-medium">
-                      {formatPrice(component.price)}
-                    </span>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -203,10 +190,6 @@ export function BuildSummary() {
 
       {/* Footer */}
       <div className="p-4 border-t">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-muted-foreground">Total</span>
-          <span className="text-xl font-bold">{formatPrice(totalPrice)}</span>
-        </div>
 
         <div className="flex gap-2">
           <Button

@@ -20,15 +20,6 @@ interface PartsListProps {
   isLoading?: boolean;
 }
 
-function formatINR(price: number): string {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
-}
-
 function PartImage({ src, alt }: { src: string | null; alt: string }) {
   const [error, setError] = useState(false);
 
@@ -65,7 +56,7 @@ export function PartsList({
 }: PartsListProps) {
   const prefersReducedMotion = useReducedMotion();
   const selectedPart = build[category];
-  const [hideIncompatible, setHideIncompatible] = useState(false);
+  const [hideIncompatible, setHideIncompatible] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
 
   // Reset to page 1 when category or search changes
@@ -353,11 +344,8 @@ export function PartsList({
                 </div>
               </div>
 
-              {/* Price and action */}
+              {/* Action */}
               <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                <div className={`text-lg font-semibold ${isIncompatible ? 'text-white/40' : 'text-white'}`}>
-                  {formatINR(part.price)}
-                </div>
                 {isIncompatible ? (
                   <span className="px-4 py-1.5 text-sm font-medium rounded-lg bg-white/5 text-white/30">
                     Incompatible
@@ -407,7 +395,7 @@ export function PartsList({
       {hasIncompatibleParts && hasActiveFilters && (
         <div className="flex items-center justify-between px-1">
           <span className="text-sm text-white/50">
-            {compatibleParts.length} compatible • {incompatibleParts.length} incompatible
+            {compatibleParts.length} compatible{hideIncompatible ? ` (${incompatibleParts.length} hidden)` : ` • ${incompatibleParts.length} incompatible`}
           </span>
           <button
             onClick={() => setHideIncompatible(!hideIncompatible)}

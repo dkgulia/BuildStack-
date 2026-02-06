@@ -8,7 +8,7 @@ interface MobileBuildSheetProps {
   isOpen: boolean;
   onClose: () => void;
   build: Build;
-  totalPrice: number;
+  totalPrice?: number;
   estimatedWattage: number;
   issues: CompatibilityIssue[];
   onCategoryClick: (category: Category) => void;
@@ -17,20 +17,10 @@ interface MobileBuildSheetProps {
   onShare?: () => void;
 }
 
-function formatINR(price: number): string {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
-}
-
 export function MobileBuildSheet({
   isOpen,
   onClose,
   build,
-  totalPrice,
   estimatedWattage,
   issues,
   onCategoryClick,
@@ -190,9 +180,6 @@ export function MobileBuildSheet({
                       </div>
                       {part && (
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          <span className="text-sm font-medium text-white">
-                            {formatINR(part.price)}
-                          </span>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -239,13 +226,8 @@ export function MobileBuildSheet({
                 </div>
               )}
 
-              {/* Total */}
-              <div className="flex items-center justify-between py-4 border-t border-white/10 mb-4">
-                <span className="text-white/70">Estimated Total</span>
-                <span className="text-2xl font-bold text-white">
-                  {formatINR(totalPrice)}
-                </span>
-              </div>
+              {/* Divider */}
+              <div className="border-t border-white/10 mb-4" />
 
               {/* Actions */}
               <div className="space-y-2">

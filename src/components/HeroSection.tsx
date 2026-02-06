@@ -288,10 +288,10 @@ export function HeroSection() {
                 whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
               >
                 <Link
-                  href="/builder"
+                  href="/builder/wizard"
                   className="inline-flex items-center justify-center w-full sm:w-auto px-6 py-3 rounded-lg border font-medium hover:bg-muted transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                 >
-                  Check Compatibility
+                  Guided Setup
                 </Link>
               </motion.div>
             </motion.div>
@@ -301,7 +301,7 @@ export function HeroSection() {
               variants={itemVariants}
               className="mt-4 text-sm text-muted-foreground"
             >
-              No signup required • Save builds later
+              No signup required • Not sure where to start? Try the <Link href="/builder/wizard" className="underline hover:text-foreground transition-colors">guided wizard</Link>.
             </motion.p>
           </motion.div>
 

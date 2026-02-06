@@ -1,46 +1,74 @@
 import { Build } from './compatibility';
+import { supabase } from './supabase/client';
 
-// TODO: Replace this in-memory store with a proper database (Postgres/Supabase/MongoDB)
-// For production:
-// 1. Create a 'builds' table with columns: id, name, parts (jsonb), currency, created_at
-// 2. Replace createBuild with INSERT query
-// 3. Replace getBuild with SELECT query
-// 4. Add proper error handling and connection pooling
-
-const buildsStore = new Map<string, Build>();
-
-function generateId(): string {
+function generateSlug(): string {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  let id = '';
+  let slug = '';
   for (let i = 0; i < 8; i++) {
-    id += chars[Math.floor(Math.random() * chars.length)];
+    slug += chars[Math.floor(Math.random() * chars.length)];
   }
-  return id;
+  return slug;
 }
 
-export function createBuild(build: Omit<Build, 'id' | 'createdAt'>): Build {
-  const id = generateId();
-  const createdAt = new Date().toISOString();
+export async function createBuild(
+  build: Omit<Build, 'id' | 'createdAt'>
+): Promise<Build> {
+  const slug = generateSlug();
 
-  const newBuild: Build = {
-    ...build,
-    id,
-    createdAt,
+  const row = {
+    name: build.name || 'My PC Build',
+    components: build.parts,
+    slug,
+    is_public: true,
   };
 
-  buildsStore.set(id, newBuild);
+  const { data, error } = await supabase
+    .from('builds')
+    .insert(row)
+    .select('id, slug, name, components, created_at')
+    .single();
 
-  return newBuild;
+  if (error) {
+    throw new Error(`Failed to save build: ${error.message}`);
+  }
+
+  return {
+    id: data.slug,
+    name: data.name,
+    parts: data.components,
+    currency: 'INR',
+    createdAt: data.created_at,
+  };
 }
 
-export function getBuild(id: string): Build | null {
-  return buildsStore.get(id) || null;
-}
+export async function getBuild(idOrSlug: string): Promise<Build | null> {
+  // Try by slug first (short IDs), then by UUID
+  let query = supabase
+    .from('builds')
+    .select('id, slug, name, components, created_at')
+    .eq('slug', idOrSlug)
+    .maybeSingle();
 
-export function getAllBuilds(): Build[] {
-  return Array.from(buildsStore.values());
-}
+  let { data, error } = await query;
 
-export function deleteBuild(id: string): boolean {
-  return buildsStore.delete(id);
+  if (!data && !error) {
+    // Try by UUID
+    const result = await supabase
+      .from('builds')
+      .select('id, slug, name, components, created_at')
+      .eq('id', idOrSlug)
+      .maybeSingle();
+    data = result.data;
+    error = result.error;
+  }
+
+  if (error || !data) return null;
+
+  return {
+    id: data.slug || data.id,
+    name: data.name,
+    parts: data.components,
+    currency: 'INR',
+    createdAt: data.created_at,
+  };
 }

@@ -28,15 +28,6 @@ interface CompatiblePartsSheetProps {
   onSelectPart: (part: CompatiblePart) => void;
 }
 
-function formatINR(price: number): string {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
-}
-
 const categoryIcons: Record<string, React.ElementType> = {
   cpu: Cpu,
   gpu: Monitor,
@@ -141,9 +132,6 @@ export function CompatiblePartsSheet({
                         <p className="text-xs text-white/50">{part.brand}</p>
                         <p className="text-sm font-medium text-white truncate">{part.name}</p>
                       </div>
-                      <p className="text-sm font-semibold text-green-400 flex-shrink-0">
-                        {formatINR(part.price)}
-                      </p>
                     </div>
                     <p className="text-xs text-white/40 mt-1">
                       {getSpecsDisplay(part.category, part.specs)}
